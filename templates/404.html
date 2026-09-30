@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Recurso No Encontrado | Renting Industrial</title>
+    <style>
+        :root {
+            --bg-base: #0b0f17;
+            --bg-card: #151b26;
+            --border-ui: #283347;
+            --cat-yellow: #f59e0b;
+            --cat-yellow-hover: #d97706;
+            --steel-gray: #94a3b8;
+            --text-light: #f8fafc;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .error-wrapper {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1.2rem;
+        }
+
+        .error-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-ui);
+            border-top: 5px solid var(--cat-yellow);
+            border-radius: 10px;
+            padding: 2.8rem 2.2rem;
+            max-width: 520px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.6);
+        }
+
+        .error-code {
+            font-size: 5.5rem;
+            font-weight: 900;
+            line-height: 1;
+            color: var(--cat-yellow);
+            letter-spacing: -2px;
+            margin-bottom: 0.8rem;
+        }
+
+        .error-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.8rem;
+            color: #ffffff;
+        }
+
+        .error-desc {
+            font-size: 0.92rem;
+            color: var(--steel-gray);
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+        }
+
+        .captured-box {
+            background: #090e18;
+            border: 1px dashed var(--border-ui);
+            color: var(--cat-yellow);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-family: Consolas, monospace;
+            font-size: 0.88rem;
+            word-break: break-all;
+            margin-bottom: 1.8rem;
+        }
+
+        .btn-home {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            background-color: var(--cat-yellow);
+            color: #000000;
+            text-decoration: none;
+            font-weight: 800;
+            font-size: 0.92rem;
+            padding: 12px 24px;
+            border-radius: 6px;
+            transition: background-color 0.2s ease, transform 0.2s ease;
+        }
+
+        .btn-home:hover {
+            background-color: var(--cat-yellow-hover);
+            transform: translateY(-2px);
+        }
+
+        footer {
+            background-color: #111827;
+            border-top: 1px solid var(--border-ui);
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--steel-gray);
+            font-size: 0.85rem;
+        }
+
+        footer p { margin-bottom: 4px; }
+        footer span { color: var(--cat-yellow); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="error-wrapper">
+        <div class="error-card">
+            <div class="error-code">404</div>
+            <h1 class="error-title">Recurso o Ruta No Encontrada</h1>
+            <p class="error-desc">
+                La dirección solicitada no corresponde a un endpoint válido de la API ni a un módulo de la plataforma de arriendos.
+            </p>
+
+            <div class="captured-box">/{{ ruta }}</div>
+
+            <a href="/" class="btn-home">← Volver al Portal Principal</a>
+        </div>
+    </div>
+
+    <!-- FOOTER OFICIAL REGLAMENTARIO -->
+    <footer>
+        <p style="font-weight: bold; color: #ffffff;">
+            Sistema de Arriendo de Maquinaria de Construcción - Caso 6
+        </p>
+        <p>
+            Desarrollador: <span>Felipe Eduardo Rivas Garrido</span> | 
+            Sección: <span>AP-N4-C2</span> | 
+            Año: <span>2026</span>
+        </p>
+    </footer>
+
+</body>
+</html>

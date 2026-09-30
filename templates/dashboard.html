@@ -1,0 +1,772 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Control Ejecutivo - Renting Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Estructura KPIs */
+    .kpi-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    .kpi-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-ui);
+        border-radius: 12px;
+        padding: 1.3rem;
+        box-shadow: var(--shadow-card);
+        position: relative;
+        overflow: hidden;
+    }
+    .kpi-card::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: var(--cat-yellow);
+        opacity: 0.6;
+    }
+    .kpi-card h4 {
+        font-size: 0.78rem;
+        color: var(--steel-gray);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+    }
+    .kpi-card .kpi-num {
+        font-size: 1.7rem;
+        font-weight: 900;
+        color: var(--cat-yellow);
+    }
+
+    /* Gráfica Profesional */
+    .chart-panel {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-ui);
+        border-radius: 14px;
+        padding: 1.6rem;
+        margin-bottom: 2.2rem;
+        box-shadow: var(--shadow-card);
+    }
+    .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+        padding-bottom: 0.8rem;
+        border-bottom: 1px solid var(--border-ui);
+    }
+    .chart-header h3 {
+        font-size: 1.15rem;
+        color: var(--text-heading);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .chart-content-layout {
+        display: grid;
+        grid-template-columns: 360px 1fr;
+        gap: 2rem;
+        align-items: center;
+    }
+
+    .donut-center-container {
+        position: relative;
+        width: 100%;
+        height: 280px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .donut-center-text {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        text-align: center;
+        pointer-events: none;
+    }
+    .donut-center-label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--steel-gray);
+        font-weight: 700;
+    }
+    .donut-center-val {
+        font-size: 1.45rem;
+        font-weight: 900;
+        color: var(--text-heading);
+        margin-top: 2px;
+    }
+
+    .category-breakdown-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+    .cat-item-card {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-ui);
+        border-radius: 10px;
+        padding: 10px 14px;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .cat-item-card:hover {
+        transform: translateX(4px);
+        border-color: var(--cat-yellow);
+    }
+    .cat-item-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 6px;
+    }
+    .cat-item-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: var(--text-heading);
+    }
+    .cat-color-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+    }
+    .cat-item-amount {
+        font-size: 0.9rem;
+        font-weight: 800;
+        color: var(--text-heading);
+    }
+    .cat-item-pct {
+        font-size: 0.75rem;
+        color: var(--steel-gray);
+        margin-left: 6px;
+        font-weight: 600;
+    }
+    .cat-progress-track {
+        height: 6px;
+        width: 100%;
+        background-color: var(--border-ui);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+    .cat-progress-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.6s ease;
+    }
+
+    /* Tablas y Formularios CRUD */
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: 380px 1fr;
+        gap: 2rem;
+    }
+    .panel-block {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-ui);
+        border-radius: 12px;
+        padding: 1.4rem;
+        box-shadow: var(--shadow-card);
+        margin-bottom: 2rem;
+    }
+    .panel-block h3 {
+        font-size: 1.1rem;
+        color: var(--text-heading);
+        margin-bottom: 1rem;
+        border-bottom: 1px solid var(--border-ui);
+        padding-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .form-group { margin-bottom: 1rem; }
+    .form-group label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-light);
+        margin-bottom: 4px;
+    }
+    .form-group input, .form-group select {
+        width: 100%;
+        padding: 9px 12px;
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-ui);
+        color: var(--text-heading);
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.84rem;
+    }
+    th, td {
+        padding: 10px;
+        text-align: left;
+        border-bottom: 1px solid var(--border-ui);
+        vertical-align: middle;
+    }
+    th {
+        color: var(--text-heading);
+        font-weight: 700;
+        background-color: var(--input-bg);
+    }
+
+    .thumb-preview {
+        width: 44px;
+        height: 44px;
+        object-fit: cover;
+        border-radius: 6px;
+        border: 1px solid var(--border-ui);
+        display: block;
+    }
+    .thumb-placeholder {
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        background-color: var(--input-bg);
+        border-radius: 6px;
+        border: 1px solid var(--border-ui);
+    }
+
+    @media(max-width: 990px) {
+        .chart-content-layout { grid-template-columns: 1fr; }
+        .dashboard-grid { grid-template-columns: 1fr; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- KPIs SUPERIORES -->
+<div class="kpi-grid">
+    <div class="kpi-card">
+        <h4>Facturación Bruta (Contratos)</h4>
+        <div class="kpi-num" id="kpi-facturacion">$0</div>
+    </div>
+    <div class="kpi-card">
+        <h4>Contratos Activos</h4>
+        <div class="kpi-num" id="kpi-activos" style="color: var(--emerald-stock);">0</div>
+    </div>
+    <div class="kpi-card">
+        <h4>Total Flota Industrial</h4>
+        <div class="kpi-num" id="kpi-flota">0</div>
+    </div>
+    <div class="kpi-card">
+        <h4>Unidades Disponibles</h4>
+        <div class="kpi-num" id="kpi-stock-bodega" style="color: #3b82f6;">0</div>
+    </div>
+</div>
+
+<!-- PANEL GRÁFICA DE VENTAS -->
+<div class="chart-panel">
+    <div class="chart-header">
+        <h3>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--cat-yellow);">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M12 2a10 10 0 0 1 10 10h-10z"></path>
+            </svg>
+            Distribución de Facturación por Categoría
+        </h3>
+        <button class="btn-ui" style="font-size: 0.75rem; padding: 5px 10px;" onclick="cargarGraficaVentas()">↻ Actualizar Datos</button>
+    </div>
+
+    <div class="chart-content-layout">
+        <div class="donut-center-container">
+            <canvas id="chart-ventas"></canvas>
+            <div class="donut-center-text">
+                <div class="donut-center-label">Total Arriendos</div>
+                <div class="donut-center-val" id="donut-center-total">$0</div>
+            </div>
+        </div>
+        <div class="category-breakdown-list" id="category-breakdown-box"></div>
+    </div>
+</div>
+
+<!-- GESTIÓN Y OPERACIONES CRUD -->
+<div class="dashboard-grid">
+    <!-- FORMULARIO CRUD (CREAR Y EDITAR CON SOPORTE DE IMAGEN) -->
+    <aside>
+        <div class="panel-block">
+            <h3 id="form-titulo">🚜 Añadir Maquinaria</h3>
+            <form id="form-maquinaria-crud" onsubmit="guardarMaquinaria(event)">
+                <input type="hidden" id="edit-maquinaria-id" value="">
+
+                <div class="form-group">
+                    <label>Nombre del Equipo</label>
+                    <input type="text" id="m-nombre" placeholder="ej: Rodillo Dynapac CA250" required>
+                </div>
+                <div class="form-group">
+                    <label>Categoría</label>
+                    <select id="m-categoria" required>
+                        <option value="Excavadoras">Excavadoras</option>
+                        <option value="Generadores">Generadores</option>
+                        <option value="Carga y Transporte">Carga y Transporte</option>
+                        <option value="Compactación">Compactación</option>
+                        <option value="Elevación">Elevación</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Tarifa Diaria ($)</label>
+                    <input type="number" id="m-tarifa" placeholder="120000" required>
+                </div>
+                <div class="form-group">
+                    <label>Garantía Fija ($)</label>
+                    <input type="number" id="m-garantia" placeholder="400000" required>
+                </div>
+                <div class="form-group">
+                    <label>Stock en Bodega</label>
+                    <input type="number" id="m-stock" placeholder="2" min="0" required>
+                </div>
+
+                <!-- CAMPO DE CARGA DE IMAGEN -->
+                <div class="form-group">
+                    <label>Fotografía / Imagen del Equipo</label>
+                    <input type="file" id="m-imagen" accept="image/*" style="padding: 6px;">
+                    <small id="img-preview-text" style="color:var(--steel-gray); font-size:0.75rem; display:block; margin-top:4px;"></small>
+                </div>
+                
+                <div style="display: flex; gap: 8px; margin-top: 1rem;">
+                    <button type="submit" class="btn-ui btn-primary" id="btn-submit-maquinaria" style="flex: 1; justify-content: center;">
+                        Ingresar a Flota
+                    </button>
+                    <button type="button" class="btn-ui" id="btn-cancelar-edicion" style="display: none;" onclick="cancelarEdicion()">
+                        Cancelar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </aside>
+
+    <!-- TABLAS DE CONTRATOS Y FLOTA -->
+    <main>
+        <!-- CONTRATOS -->
+        <div class="panel-block">
+            <h3>📑 Control de Contratos (Transición de Estados y Extensión)</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Empresa / Cliente</th>
+                            <th>Total Liquidado</th>
+                            <th>Estado</th>
+                            <th>Emisión</th>
+                            <th>Acciones Ejecutivas</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-admin-contratos"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- FLOTA CON PREVISUALIZACIÓN DE FOTO -->
+        <div class="panel-block">
+            <h3>🏗️ Catálogo de Flota Pesada (Edición y Bajas)</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Tarifa/Día</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabla-admin-flota"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let miGraficaChart = null;
+    let inventarioCache = [];
+
+    const paletaCategorias = ['#f59e0b', '#3b82f6', '#10b981', '#8b5cf6', '#ec4899', '#06b6d4'];
+
+    if (!authToken || !currentUser || currentUser.rol !== 'ADMINISTRADOR') {
+        alert("Acceso exclusivo para el Administrador / Ejecutivo.");
+        window.location.href = '/login/';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarKPIs();
+        cargarGraficaVentas();
+        cargarContratosAdmin();
+        cargarFlotaAdmin();
+    });
+
+    // ================= 1. CARGA DE KPIS =================
+    async function cargarKPIs() {
+        try {
+            const [resContratos, resFlota] = await Promise.all([
+                fetch(`${API_URL}/contratos/`, { headers: { 'Authorization': `Bearer ${authToken}` } }),
+                fetch(`${API_URL}/maquinarias/`)
+            ]);
+
+            const contratos = await resContratos.json();
+            const flota = await resFlota.json();
+
+            const facturacionTotal = contratos
+                .filter(c => c.estado !== 'CANCELADO')
+                .reduce((acc, c) => acc + Number(c.total), 0);
+
+            const activos = contratos.filter(c => c.estado === 'ACTIVO').length;
+            const stockTotal = flota.reduce((acc, m) => acc + Number(m.stock), 0);
+
+            document.getElementById('kpi-facturacion').innerText = `$${facturacionTotal.toLocaleString()}`;
+            document.getElementById('kpi-activos').innerText = activos;
+            document.getElementById('kpi-flota').innerText = flota.length;
+            document.getElementById('kpi-stock-bodega').innerText = `${stockTotal} u.`;
+        } catch (err) {
+            console.error("Error al calcular KPIs:", err);
+        }
+    }
+
+    // ================= 2. GRÁFICA =================
+    async function cargarGraficaVentas() {
+        try {
+            const res = await fetch(`${API_URL}/contratos/grafica-ventas/`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            if (!res.ok) return;
+            const data = await res.json();
+
+            const ctx = document.getElementById('chart-ventas').getContext('2d');
+            const esOscuro = document.body.classList.contains('dark-mode');
+            const borderColor = esOscuro ? '#111827' : '#ffffff';
+
+            const sumaTotal = data.datos.reduce((acc, v) => acc + Number(v), 0);
+            document.getElementById('donut-center-total').innerText = `$${sumaTotal.toLocaleString()}`;
+
+            if (miGraficaChart) {
+                miGraficaChart.destroy();
+            }
+
+            const coloresUsados = paletaCategorias.slice(0, data.labels.length);
+
+            miGraficaChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: data.labels,
+                    datasets: [{
+                        data: data.datos,
+                        backgroundColor: coloresUsados,
+                        borderColor: borderColor,
+                        borderWidth: 3,
+                        borderRadius: 8,
+                        spacing: 5,
+                        hoverOffset: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '72%',
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: esOscuro ? '#1e293b' : '#0f172a',
+                            titleColor: '#ffffff',
+                            bodyColor: '#e2e8f0',
+                            padding: 10,
+                            displayColors: false,
+                            callbacks: {
+                                label: function(ctx) {
+                                    const val = Number(ctx.raw || 0);
+                                    const pct = sumaTotal > 0 ? ((val / sumaTotal) * 100).toFixed(1) : 0;
+                                    return `Facturación: $${val.toLocaleString()} (${pct}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            const breakdownBox = document.getElementById('category-breakdown-box');
+            breakdownBox.innerHTML = '';
+
+            data.labels.forEach((cat, idx) => {
+                const monto = Number(data.datos[idx] || 0);
+                const porcentaje = sumaTotal > 0 ? ((monto / sumaTotal) * 100).toFixed(1) : 0;
+                const color = coloresUsados[idx] || '#64748b';
+
+                breakdownBox.innerHTML += `
+                    <div class="cat-item-card">
+                        <div class="cat-item-top">
+                            <div class="cat-item-name">
+                                <span class="cat-color-dot" style="background-color: ${color};"></span>
+                                <span>${cat}</span>                             </div>                             <div>                                 <span class="cat-item-amount">$${monto.toLocaleString()}</span>
+                                <span class="cat-item-pct">(${porcentaje}%)</span>
+                            </div>
+                        </div>
+                        <div class="cat-progress-track">
+                            <div class="cat-progress-fill" style="width: ${porcentaje}\%; background-color:${color};"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        } catch (err) {
+            console.error("Error al cargar gráfica:", err);
+        }
+    }
+
+    function actualizarColoresGrafica() {
+        if (miGraficaChart) cargarGraficaVentas();
+    }
+
+    // ================= 3. CONTRATOS =================
+    async function cargarContratosAdmin() {
+        try {
+            const res = await fetch(`${API_URL}/contratos/`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const data = await res.json();
+            const tbody = document.getElementById('tabla-admin-contratos');
+            tbody.innerHTML = '';
+
+            data.forEach(c => {
+                let botones = '';
+                if (c.estado === 'ACTIVO') {
+                    botones = `
+                        <button class="btn-ui" style="background:#16a34a; color:white; padding:3px 8px; font-size:0.75rem;" onclick="cambiarEstadoContrato(${c.id}, 'COMPLETADO')">✓ Devolver (+1)</button>
+                        <button class="btn-ui" style="background:#f59e0b; color:#000; padding:3px 8px; font-size:0.75rem; font-weight:800;" onclick="extenderPlazoContrato(${c.id})">⏱️ Extender Plazo</button>
+                        <button class="btn-ui btn-danger" style="padding:3px 8px; font-size:0.75rem;" onclick="cambiarEstadoContrato(${c.id}, 'CANCELADO')">✕ Cancelar</button>
+                    `;
+                } else {
+                    botones = `<span style="color: var(--steel-gray); font-size:0.75rem;">Procesado</span>`;
+                }
+
+                const nombreEmpresa = c.usuario_nombre || (c.usuario && c.usuario.username) || 'Empresa Constructora';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td><b>#${c.id}</b></td>
+                        <td><b>${nombreEmpresa}</b></td>                         <td style="color:var(--cat-yellow); font-weight:700;">$${Number(c.total).toLocaleString()}</td>
+                        <td><span class="badge-role role-admin">${c.estado}</span></td>
+                        <td>${new Date(c.creado_el).toLocaleDateString()}</td>
+                        <td style="display:flex; gap:6px; flex-wrap:wrap;">${botones}</td>
+                    </tr>
+                `;
+            });
+        } catch (err) {
+            console.error("Error al cargar contratos:", err);
+        }
+    }
+
+    async function extenderPlazoContrato(contratoId) {
+        const diasStr = prompt("¿Cuántos días adicionales solicita la constructora para el Contrato #" + contratoId + "?\n\n(Se liquidarán con la tarifa diaria congelada):", "3");
+        if (!diasStr) return;
+
+        const diasNum = parseInt(diasStr, 10);
+        if (isNaN(diasNum) || diasNum <= 0) {
+            notify("Indica una cantidad de días válida mayor a cero.", "error");
+            return;
+        }
+
+        try {
+            const res = await fetch(`${API_URL}/contratos/${contratoId}/extender-plazo/`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}` 
+                },
+                body: JSON.stringify({ dias_adicionales: diasNum })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                notify(data.mensaje || "Plazo extendido exitosamente.", "success");
+                await cargarContratosAdmin();
+                await cargarKPIs();
+                await cargarGraficaVentas();
+            } else {
+                notify(data.error || "No se pudo extender el plazo.", "error");
+            }
+        } catch (err) {
+            notify("Error de red.", "error");
+        }
+    }
+
+    async function cambiarEstadoContrato(contratoId, nuevoEstado) {
+        if (!confirm(`¿Confirmas cambiar el contrato #${contratoId} a '${nuevoEstado}'? El stock físico retornará automáticamente a la bodega (+1).`)) return;
+
+        try {
+            const res = await fetch(`${API_URL}/contratos/${contratoId}/cambiar-estado/`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}` 
+                },
+                body: JSON.stringify({ nuevo_estado: nuevoEstado })
+            });
+            const data = await res.json();
+            if (res.ok) {
+                notify(data.mensaje, "success");
+                await cargarContratosAdmin();
+                await cargarFlotaAdmin();
+                await cargarKPIs();
+                await cargarGraficaVentas();
+            } else {
+                notify(data.error || "Error al actualizar estado", "error");
+            }
+        } catch (err) {
+            notify("Error al comunicar con la API.", "error");
+        }
+    }
+
+    // ================= 4. CRUD DE FLOTA CON SOPORTE DE IMAGEN =================
+    async function cargarFlotaAdmin() {
+        try {
+            const res = await fetch(`${API_URL}/maquinarias/`);
+            inventarioCache = await res.json();
+            const tbody = document.getElementById('tabla-admin-flota');
+            tbody.innerHTML = '';
+            
+            const iconos = {
+                'Excavadoras': '🚜',
+                'Generadores': '⚡',
+                'Carga y Transporte': '🚛',
+                'Compactación': '🚧',
+                'Elevación': '🏗️'
+            };
+
+            inventarioCache.forEach(m => {
+                const fotoHtml = m.imagen 
+                    ? `<img src="${m.imagen}" class="thumb-preview" alt="Foto">` 
+                    : `<div class="thumb-placeholder">${iconos[m.categoria] || '🚜'}</div>`;
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${fotoHtml}</td>
+                        <td>${m.id}</td>
+                        <td><b>${m.nombre}</b></td>
+                        <td>${m.categoria}</td>                         <td>$${Number(m.tarifa_diaria).toLocaleString()}</td>
+                        <td style="font-weight:700; color:${m.stock > 0 ? 'var(--emerald-stock)' : 'var(--hazard-red)'}">${m.stock} u.</td>
+                        <td style="display:flex; gap:6px;">
+                            <button class="btn-ui" style="background:#3b82f6; color:white; padding:2px 8px; font-size:0.75rem;" onclick="activarEdicionMaquinaria(${m.id})">✏️ Editar</button>
+                            <button class="btn-ui btn-danger" style="padding:2px 8px; font-size:0.75rem;" onclick="eliminarMaquinaria(${m.id})">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        } catch (err) {
+            console.error("Error al cargar flota:", err);
+        }
+    }
+
+    function activarEdicionMaquinaria(id) {
+        const item = inventarioCache.find(m => m.id === id);
+        if (!item) return;
+
+        document.getElementById('edit-maquinaria-id').value = item.id;
+        document.getElementById('m-nombre').value = item.nombre;
+        document.getElementById('m-categoria').value = item.categoria;
+        document.getElementById('m-tarifa').value = parseInt(item.tarifa_diaria);
+        document.getElementById('m-garantia').value = parseInt(item.garantia_fija);
+        document.getElementById('m-stock').value = item.stock;
+        
+        // Limpiar selector de archivo y mostrar estado de imagen
+        document.getElementById('m-imagen').value = '';
+        document.getElementById('img-preview-text').innerText = item.imagen 
+            ? '✓ Ya posee imagen registrada. Selecciona otra si deseas reemplazarla.' 
+            : 'Sin fotografía actualmente.';
+
+        document.getElementById('form-titulo').innerText = `✏️️ Editar Maquinaria #${item.id}`;
+        document.getElementById('btn-submit-maquinaria').innerText = "Actualizar Maquinaria";
+        document.getElementById('btn-cancelar-edicion').style.display = "inline-flex";
+
+        window.scrollTo({ top: 380, behavior: 'smooth' });
+    }
+
+    function cancelarEdicion() {
+        document.getElementById('edit-maquinaria-id').value = '';
+        document.getElementById('form-maquinaria-crud').reset();
+        document.getElementById('img-preview-text').innerText = '';
+        document.getElementById('form-titulo').innerText = "🚜 Añadir Maquinaria";
+        document.getElementById('btn-submit-maquinaria').innerText = "Ingresar a Flota";
+        document.getElementById('btn-cancelar-edicion').style.display = "none";
+    }
+
+    async function guardarMaquinaria(e) {
+        e.preventDefault();
+        const editId = document.getElementById('edit-maquinaria-id').value;
+
+        // Construir FormData para soportar envío de archivo de imagen
+        const formData = new FormData();
+        formData.append('nombre', document.getElementById('m-nombre').value.trim());
+        formData.append('categoria', document.getElementById('m-categoria').value);
+        formData.append('tarifa_diaria', document.getElementById('m-tarifa').value);
+        formData.append('garantia_fija', document.getElementById('m-garantia').value);
+        formData.append('stock', document.getElementById('m-stock').value);
+
+        const fileInput = document.getElementById('m-imagen');
+        if (fileInput.files.length > 0) {
+            formData.append('imagen', fileInput.files[0]);
+        }
+
+        const url = editId ? `${API_URL}/maquinarias/${editId}/` : `${API_URL}/maquinarias/`;
+        const method = editId ? 'PATCH' : 'POST';
+
+        try {
+            // NOTA: No se debe incluir 'Content-Type': el navegador configura multipart/form-data automáticamente
+            const res = await fetch(url, {
+                method: method,
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: formData
+            });
+
+            if (res.ok) {
+                notify(editId ? "Maquinaria actualizada con éxito." : "Nueva maquinaria agregada al catálogo.", "success");
+                cancelarEdicion();
+                await cargarFlotaAdmin();
+                await cargarKPIs();
+            } else {
+                notify("No se pudo procesar la solicitud.", "error");
+            }
+        } catch (err) {
+            notify("Error de red al guardar equipo.", "error");
+        }
+    }
+
+    async function eliminarMaquinaria(id) {
+        if (!confirm("¿Deseas dar de baja este equipo de la flota?")) return;
+        try {
+            const res = await fetch(`${API_URL}/maquinarias/${id}/`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            if (res.ok) {
+                notify("Equipo eliminado.", "success");
+                await cargarFlotaAdmin();
+                await cargarKPIs();
+            }
+        } catch (err) {
+            notify("No se pudo eliminar el equipo.", "error");
+        }
+    }
+</script>
+{% endblock %}

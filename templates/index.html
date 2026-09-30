@@ -1,0 +1,535 @@
+{% extends 'base.html' %}
+
+{% block title %}Flota de Maquinaria Pesada - Renting Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Hero Banner */
+    .hero-banner {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-ui);
+        border-left: 6px solid var(--cat-yellow);
+        border-radius: 12px;
+        padding: 2rem 2.2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-card);
+    }
+    .hero-banner h1 {
+        font-size: 1.85rem;
+        color: var(--text-heading);
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.5px;
+    }
+    .hero-banner p {
+        color: var(--steel-gray);
+        font-size: 0.95rem;
+    }
+
+    /* BARRA DE FILTROS REDISEÑADA */
+    .filter-panel {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-ui);
+        border-radius: 12px;
+        padding: 1.2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--shadow-card);
+    }
+    .filter-bar {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    .filter-bar input {
+        flex: 2;
+        min-width: 240px;
+        padding: 11px 16px;
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        color: var(--text-heading);
+        font-size: 0.9rem;
+    }
+    .filter-bar select {
+        flex: 1;
+        min-width: 200px;
+        padding: 11px 16px;
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        color: var(--text-heading);
+        font-size: 0.9rem;
+    }
+
+    /* BOTÓN FILTRAR CORREGIDO CON AMARILLO INDUSTRIAL */
+    .btn-filter-submit {
+        background-color: var(--cat-yellow) !important;
+        color: #000000 !important;
+        font-weight: 800 !important;
+        border: 1px solid var(--cat-yellow) !important;
+        padding: 11px 22px !important;
+        border-radius: 8px !important;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+        box-shadow: 0 2px 4px rgba(217, 119, 6, 0.2);
+        transition: all 0.2s ease;
+    }
+    .btn-filter-submit:hover {
+        background-color: var(--cat-yellow-hover) !important;
+        color: #ffffff !important;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(217, 119, 6, 0.35);
+    }
+
+    /* Píldoras de filtrado rápido */
+    .quick-pills {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    .quick-pills span {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--steel-gray);
+        margin-right: 4px;
+    }
+    .pill-btn {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-ui);
+        color: var(--text-light);
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    .pill-btn:hover, .pill-btn.active {
+        background-color: var(--cat-yellow);
+        color: #000;
+        border-color: var(--cat-yellow);
+    }
+
+    /* Cuadrícula de Maquinarias */
+    .fleet-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 1.6rem;
+        margin-bottom: 3rem;
+    }
+    .fleet-card {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-ui);
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: var(--shadow-card);
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.2s, border-color 0.2s;
+    }
+    .fleet-card:hover {
+        transform: translateY(-4px);
+        border-color: var(--cat-yellow);
+    }
+    .card-img-placeholder {
+        height: 180px;
+        background: linear-gradient(135deg, rgba(217, 119, 6, 0.15), rgba(59, 130, 246, 0.15));
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 3.5rem;
+        border-bottom: 1px solid var(--border-ui);
+    }
+    .card-body {
+        padding: 1.4rem;
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+    }
+    .card-category {
+        font-size: 0.72rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        color: var(--cat-yellow);
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+    }
+    .card-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--text-heading);
+        margin-bottom: 10px;
+    }
+    .card-pricing {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 12px;
+    }
+    .card-rate {
+        font-size: 1.4rem;
+        font-weight: 900;
+        color: var(--cat-yellow);
+    }
+    .card-stock {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--emerald-stock);
+    }
+    .card-stock.out-of-stock {
+        color: var(--hazard-red);
+    }
+
+    .booking-inputs {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-ui);
+        border-radius: 8px;
+        padding: 10px;
+        margin-bottom: 14px;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+    }
+    .booking-inputs label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        color: var(--steel-gray);
+        display: block;
+        margin-bottom: 2px;
+    }
+    .booking-inputs input {
+        width: 100%;
+        padding: 6px;
+        border: 1px solid var(--border-ui);
+        border-radius: 4px;
+        font-size: 0.78rem;
+        background-color: var(--bg-card);
+        color: var(--text-heading);
+    }
+
+    .btn-add-cart {
+        width: 100%;
+        padding: 10px;
+        background-color: var(--cat-yellow);
+        color: #000;
+        font-weight: 800;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: auto;
+        transition: background-color 0.2s;
+    }
+    .btn-add-cart:hover {
+        background-color: var(--cat-yellow-hover);
+        color: #fff;
+    }
+    .btn-add-cart:disabled {
+        background-color: var(--border-ui);
+        color: var(--steel-gray);
+        cursor: not-allowed;
+    }
+
+    /* Modal / Carro Flotante */
+    .cart-floating-btn {
+        position: fixed;
+        bottom: 28px;
+        left: 28px;
+        background-color: var(--text-heading);
+        color: var(--bg-card);
+        padding: 12px 20px;
+        border-radius: 30px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        border: 2px solid var(--cat-yellow);
+        z-index: 100;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Banner Hero -->
+<div class="hero-banner">
+    <h1>Flota de Maquinaria Pesada para Construcción</h1>
+    <p>Disponibilidad inmediata, garantías fijas y cotización en tiempo real con validación atómica de inventario.</p>
+</div>
+
+<!-- BARRA DE BÚSQUEDA Y FILTRADO CON BOTÓN AMARILLO -->
+<div class="filter-panel">
+    <div class="filter-bar">
+        <input type="text" id="filtro-buscar" placeholder="🔍 Buscar por equipo, modelo o categoría..." oninput="filtrarCatalogoEnVivo()">
+        <select id="filtro-categoria" onchange="filtrarCatalogoEnVivo()">
+            <option value="">Todas las Categorías de Flota</option>
+            <option value="Excavadoras">Excavadoras</option>
+            <option value="Generadores">Generadores</option>
+            <option value="Carga y Transporte">Carga y Transporte</option>
+            <option value="Compactación">Compactación</option>
+            <option value="Elevación">Elevación</option>
+        </select>
+        <button type="button" class="btn-filter-submit" id="btn-filtrar-accion" onclick="filtrarCatalogoEnVivo()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+            </svg>
+            Filtrar Flota
+        </button>
+    </div>
+
+    <div class="quick-pills">
+        <span>Filtrar rápido:</span>
+        <button class="pill-btn active" onclick="aplicarPildora('', this)">Todos</button>
+        <button class="pill-btn" onclick="aplicarPildora('Excavadoras', this)">Excavadoras</button>
+        <button class="pill-btn" onclick="aplicarPildora('Generadores', this)">Generadores</button>
+        <button class="pill-btn" onclick="aplicarPildora('Carga y Transporte', this)">Carga y Transporte</button>
+        <button class="pill-btn" onclick="aplicarPildora('Compactación', this)">Compactación</button>
+        <button class="pill-btn" onclick="aplicarPildora('Elevación', this)">Elevación</button>
+    </div>
+</div>
+
+<!-- Cuadrícula del Catálogo -->
+<div class="fleet-grid" id="catalogo-maquinarias"></div>
+
+<!-- Botón Flotante Carro -->
+<div class="cart-floating-btn" id="btn-flotante-carro" onclick="abrirModalCarro()" style="display: none;">
+    🛒 Cotización Carro (<span id="cart-counter">0</span>)
+</div>
+
+<!-- Modal Carro de Arriendo -->
+<div id="modal-carro" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:2000; justify-content:center; align-items:center;">
+    <div style="background:var(--bg-card); border-radius:12px; padding:2rem; width:90%; max-width:600px; max-height:85vh; overflow-y:auto; border:1px solid var(--border-ui);">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; border-bottom:1px solid var(--border-ui); padding-bottom:10px;">
+            <h3 style="color:var(--text-heading);">🛒 Carro de Cotización</h3>
+            <button class="btn-ui" onclick="cerrarModalCarro()">✕ Cerrar</button>
+        </div>
+        <div id="carro-items-lista" style="margin-bottom:1.5rem;"></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem; font-size:1.2rem; font-weight:900; color:var(--cat-yellow);">
+            <span>Total Estimado:</span>
+            <span id="carro-total-monto">$0</span>
+        </div>
+        <button class="btn-ui btn-primary" style="width:100%; padding:12px; justify-content:center; font-size:1rem;" onclick="ejecutarCheckout()">
+            Formalizar Contrato y Pagar
+        </button>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    let flotaCompleta = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+        cargarCatalogo();
+        if (authToken && currentUser && currentUser.rol === 'CLIENTE') {
+            document.getElementById('btn-flotante-carro').style.display = 'flex';
+            actualizarCarro();
+        }
+    });
+
+    async function cargarCatalogo() {
+        try {
+            const res = await fetch(`${API_URL}/maquinarias/`);
+            flotaCompleta = await res.json();
+            renderizarCatalogo(flotaCompleta);
+        } catch (err) {
+            console.error("Error al cargar maquinaria:", err);
+        }
+    }
+
+    function renderizarCatalogo(lista) {
+        const contenedor = document.getElementById('catalogo-maquinarias');
+        contenedor.innerHTML = '';
+
+        if (!lista.length) {
+            contenedor.innerHTML = '<p style="grid-column: 1/-1; text-align:center; padding: 2rem; color:var(--steel-gray);">No se encontraron equipos para el criterio seleccionado.</p>';
+            return;
+        }
+
+        const hoy = new Date().toISOString().split('T')[0];
+        const fechaTerminoDefault = new Date(Date.now() + 3 * 86400000).toISOString().split('T')[0];
+
+        const iconos = {
+            'Excavadoras': '🚜',
+            'Generadores': '⚡',
+            'Carga y Transporte': '🚛',
+            'Compactación': '🚧',
+            'Elevación': '🏗️'
+        };
+
+        lista.forEach(m => {
+            const sinStock = m.stock < 1;
+            contenedor.innerHTML += `
+                <div class="fleet-card">
+                    <div class="card-img-placeholder">${iconos[m.categoria] || '🚜'}</div>
+                    <div class="card-body">
+                        <div class="card-category">${m.categoria}</div>
+                        <div class="card-title">${m.nombre}</div>
+                        <div class="card-pricing">
+                            <span class="card-rate">$${Number(m.tarifa_diaria).toLocaleString()}<span style="font-size:0.75rem; color:var(--steel-gray);">/día</span></span>
+                            <span class="card-stock ${sinStock ? 'out-of-stock' : ''}">${sinStock ? 'Sin flota disponible' : `${m.stock} en bodega`}</span>
+                        </div>
+                        <div style="font-size:0.78rem; color:var(--steel-gray); margin-bottom:12px;">Garantía de respaldo: $${Number(m.garantia_fija).toLocaleString()}</div>
+                        
+                        <div class="booking-inputs">
+                            <div>
+                                <label>Inicio:</label>
+                                <input type="date" id="ini-${m.id}" value="${hoy}" min="${hoy}">
+                            </div>
+                            <div>
+                                <label>Término:</label>
+                                <input type="date" id="fin-${m.id}" value="${fechaTerminoDefault}" min="${hoy}">
+                            </div>
+                        </div>
+
+                        <button class="btn-add-cart" ${sinStock ? 'disabled' : ''} onclick="agregarAlCarro(${m.id})">
+                            ${sinStock ? 'No Disponible' : 'Cotizar Arriendo'}
+                        </button>
+                    </div>
+                </div>
+            `;
+        });
+    }
+
+    function filtrarCatalogoEnVivo() {
+        const texto = document.getElementById('filtro-buscar').value.toLowerCase().trim();
+        const categoria = document.getElementById('filtro-categoria').value;
+
+        const filtrados = flotaCompleta.filter(m => {
+            const coincideTexto = m.nombre.toLowerCase().includes(texto) || m.categoria.toLowerCase().includes(texto);
+            const coincideCat = categoria === '' || m.categoria === categoria;
+            return coincideTexto && coincideCat;
+        });
+
+        renderizarCatalogo(filtrados);
+    }
+
+    function aplicarPildora(categoria, btn) {
+        document.querySelectorAll('.pill-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('filtro-categoria').value = categoria;
+        filtrarCatalogoEnVivo();
+    }
+
+    async function agregarAlCarro(maquinariaId) {
+        if (!authToken) {
+            alert("Debes iniciar sesión con tu cuenta de Empresa Constructora para cotizar y arrendar.");
+            window.location.href = '/login/';
+            return;
+        }
+
+        const ini = document.getElementById(`ini-${maquinariaId}`).value;
+        const fin = document.getElementById(`fin-${maquinariaId}`).value;
+
+        try {
+            const res = await fetch(`${API_URL}/carro-arriendo/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken}`
+                },
+                body: JSON.stringify({
+                    maquinaria_id: maquinariaId,
+                    fecha_inicio: ini,
+                    fecha_fin: fin
+                })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                notify("Equipo añadido al carro.", "success");
+                actualizarCarro();
+            } else {
+                notify(data.error || "Error al agregar equipo", "error");
+            }
+        } catch (err) {
+            notify("Error de conexión.", "error");
+        }
+    }
+
+    async function actualizarCarro() {
+        if (!authToken) return;
+        try {
+            const res = await fetch(`${API_URL}/carro-arriendo/`, {
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const data = await res.json();
+            const counter = document.getElementById('cart-counter');
+            if (counter) counter.innerText = data.items ? data.items.length : 0;
+            const totalEl = document.getElementById('carro-total-monto');
+            if (totalEl) totalEl.innerText = `$${Number(data.total_general || 0).toLocaleString()}`;
+
+            const lista = document.getElementById('carro-items-lista');
+            if (lista) {
+                lista.innerHTML = '';
+                if (!data.items || !data.items.length) {
+                    lista.innerHTML = '<p style="color:var(--steel-gray); text-align:center;">El carro de cotización está vacío.</p>';
+                } else {
+                    data.items.forEach(it => {
+                        lista.innerHTML += `
+                            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border-ui); padding:8px 0;">
+                                <div>
+                                    <b>${it.maquinaria_detalle.nombre}</b><br>
+                                    <small style="color:var(--steel-gray);">${it.fecha_inicio} al ${it.fecha_fin} (${it.dias_totales} días)</small>
+                                </div>
+                                <div style="display:flex; align-items:center; gap:10px;">
+                                    <span style="font-weight:700; color:var(--cat-yellow);">$${Number(it.subtotal_calculado).toLocaleString()}</span>
+                                    <button class="btn-ui btn-danger" style="padding:2px 6px; font-size:0.75rem;" onclick="eliminarDelCarro(${it.id})">✕</button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+            }
+        } catch (err) {
+            console.error("Error al actualizar carro:", err);
+        }
+    }
+
+    async function eliminarDelCarro(itemId) {
+        try {
+            const res = await fetch(`${API_URL}/carro-arriendo/?item_id=${itemId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            if (res.ok) {
+                actualizarCarro();
+            }
+        } catch (err) {}
+    }
+
+    function abrirModalCarro() {
+        document.getElementById('modal-carro').style.display = 'flex';
+        actualizarCarro();
+    }
+    function cerrarModalCarro() {
+        document.getElementById('modal-carro').style.display = 'none';
+    }
+
+    async function ejecutarCheckout() {
+        if (!confirm("¿Deseas formalizar este contrato de arriendo? Se efectuará el bloqueo atómico de stock en PostgreSQL.")) return;
+
+        try {
+            const res = await fetch(`${API_URL}/contratos/checkout/`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${authToken}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                notify(data.mensaje || "Contrato emitido exitosamente.", "success");
+                cerrarModalCarro();
+                await cargarCatalogo();
+                await actualizarCarro();
+            } else {
+                notify(data.error || "No fue posible procesar el contrato.", "error");
+            }
+        } catch (err) {
+            notify("Error al conectar con la pasarela transaccional.", "error");
+        }
+    }
+</script>
+{% endblock %}

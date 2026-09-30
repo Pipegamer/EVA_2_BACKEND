@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Renting Industrial 2026{% endblock %}</title>
+    <!-- Librería Chart.js para gráficos dinámicos -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* ================= TEMA PRINCIPAL: MODO BLANCO / CLARO ================= */
+        :root {
+            --bg-base: #f8fafc;
+            --bg-card: #ffffff;
+            --text-heading: #0f172a;
+            --text-light: #334155;
+            --steel-gray: #64748b;
+            --border-ui: #e2e8f0;
+            --input-bg: #f1f5f9;
+            --cat-yellow: #d97706;
+            --cat-yellow-hover: #b45309;
+            --cat-amber-dim: #fef3c7;
+            --emerald-stock: #16a34a;
+            --hazard-red: #dc2626;
+            --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
+            --header-bg: #ffffff;
+        }
+
+        /* ================= TEMA SECUNDARIO: MODO OSCURO ================= */
+        body.dark-mode {
+            --bg-base: #0b0f19;
+            --bg-card: #111827;
+            --text-heading: #f9fafb;
+            --text-light: #e5e7eb;
+            --steel-gray: #9ca3af;
+            --border-ui: #1f2937;
+            --input-bg: #1a2234;
+            --cat-yellow: #f59e0b;
+            --cat-yellow-hover: #d97706;
+            --cat-amber-dim: rgba(245, 158, 11, 0.15);
+            --emerald-stock: #10b981;
+            --hazard-red: #ef4444;
+            --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+            --header-bg: #111827;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-light);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        header {
+            background-color: var(--header-bg);
+            border-bottom: 2px solid var(--border-ui);
+            padding: 0.85rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .header-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .brand-title {
+            font-size: 1.25rem;
+            font-weight: 900;
+            color: var(--text-heading);
+            letter-spacing: -0.5px;
+        }
+
+        .brand-tag {
+            background-color: var(--cat-yellow);
+            color: #000;
+            font-size: 0.7rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 4px;
+            text-transform: uppercase;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* PALANCA MODO CLARO / OSCURO */
+        .theme-switch-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-right: 4px;
+        }
+        .theme-switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        .theme-switch input { opacity: 0; width: 0; height: 0; }
+        .theme-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 34px;
+        }
+        .theme-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .theme-slider {
+            background-color: #3b82f6;
+        }
+        input:checked + .theme-slider:before {
+            transform: translateX(22px);
+        }
+
+        .btn-ui {
+            padding: 7px 14px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            border: 1px solid var(--border-ui);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--bg-card);
+            color: var(--text-heading);
+            transition: all 0.2s ease;
+        }
+        .btn-ui:hover {
+            border-color: var(--cat-yellow);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary {
+            background-color: var(--cat-yellow);
+            color: #000;
+            border-color: var(--cat-yellow);
+        }
+        .btn-primary:hover {
+            background-color: var(--cat-yellow-hover);
+            color: #fff;
+        }
+
+        .btn-danger {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border-color: #fca5a5;
+        }
+        body.dark-mode .btn-danger {
+            background-color: rgba(220, 38, 38, 0.2);
+            color: #f87171;
+            border-color: rgba(220, 38, 38, 0.4);
+        }
+
+        .badge-role {
+            font-size: 0.72rem;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+        .role-admin { background: #ede9fe; color: #6d28d9; border: 1px solid #ddd6fe; }
+        body.dark-mode .role-admin { background: rgba(139, 92, 246, 0.2); color: #c4b5fd; border: 1px solid rgba(139, 92, 246, 0.4); }
+
+        .role-cliente { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+        body.dark-mode .role-cliente { background: rgba(59, 130, 246, 0.2); color: #93c5fd; border: 1px solid rgba(59, 130, 246, 0.4); }
+
+        .container {
+            max-width: 1300px;
+            margin: 1.8rem auto;
+            padding: 0 1.5rem;
+            flex: 1;
+            width: 100%;
+        }
+
+        footer {
+            background-color: var(--bg-card);
+            border-top: 1px solid var(--border-ui);
+            padding: 1.2rem;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--steel-gray);
+            margin-top: auto;
+        }
+
+        #system-notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            display: none;
+            z-index: 9999;
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2);
+        }
+        .notify-success { background: #16a34a; color: white; }
+        .notify-error { background: #dc2626; color: white; }
+    </style>
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+    <header>
+        <a href="/" class="header-brand">
+            <span class="brand-title">RENTING INDUSTRIAL</span>
+            <span class="brand-tag">Flota Pesada</span>
+        </a>
+
+        <div class="nav-actions">
+            <!-- Palanca Tema -->
+            <div class="theme-switch-wrap" title="Cambiar a Modo Oscuro">
+                <span style="font-size: 0.8rem;">☀️</span>
+                <label class="theme-switch">
+                    <input type="checkbox" id="theme-toggle" onchange="alternarTema(this.checked)">
+                    <span class="theme-slider"></span>
+                </label>
+                <span style="font-size: 0.8rem;">🌙</span>
+            </div>
+
+            <!-- Accesos Principales -->
+            <a href="/" class="btn-ui">Catálogo Flota</a>
+            <a href="/dashboard/" id="nav-dashboard" class="btn-ui" style="display: none;">Panel Ejecutivo</a>
+            
+            <!-- SWAGGER Y ADMIN: VISIBLES EXCLUSIVAMENTE PARA EL ADMINISTRADOR -->
+            <a href="/api/docs/" target="_blank" class="btn-ui" id="nav-swagger" style="display: none;">Swagger API</a>
+            <a href="/admin/" target="_blank" class="btn-ui" id="nav-admin" style="display: none;">Django Admin</a>
+
+            <!-- Sesión -->
+            <span id="nav-user-badge"></span>
+            <a href="/login/" id="nav-btn-login" class="btn-ui btn-primary">Iniciar Sesión</a>
+            <button id="nav-btn-logout" class="btn-ui btn-danger" style="display: none;" onclick="cerrarSesion()">Salir</button>
+        </div>
+    </header>
+
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        Sistema de Gestión y Arriendo de Maquinaria Pesada | Arquitectura Transaccional ACID PostgreSQL 2026
+    </footer>
+
+    <div id="system-notification"></div>
+
+    <script>
+        const API_URL = '/api';
+        let authToken = localStorage.getItem('access_token');
+        let currentUser = null;
+
+        (function inicializarTema() {
+            const temaGuardado = localStorage.getItem('app_theme') || 'light';
+            const toggle = document.getElementById('theme-toggle');
+            if (temaGuardado === 'dark') {
+                document.body.classList.add('dark-mode');
+                if (toggle) toggle.checked = true;
+            } else {
+                document.body.classList.remove('dark-mode');
+                if (toggle) toggle.checked = false;
+            }
+        })();
+
+        function alternarTema(activarOscuro) {
+            if (activarOscuro) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('app_theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('app_theme', 'light');
+            }
+            if (typeof actualizarColoresGrafica === 'function') {
+                actualizarColoresGrafica();
+            }
+        }
+
+        try {
+            const raw = localStorage.getItem('user_info');
+            if (raw) currentUser = JSON.parse(raw);
+        } catch(e) {}
+
+        function actualizarBarraNavegacion() {
+            const btnLogin = document.getElementById('nav-btn-login');
+            const btnLogout = document.getElementById('nav-btn-logout');
+            const navDash = document.getElementById('nav-dashboard');
+            const navAdm = document.getElementById('nav-admin');
+            const navSwagger = document.getElementById('nav-swagger');
+            const userBadge = document.getElementById('nav-user-badge');
+
+            if (authToken && currentUser) {
+                btnLogin.style.display = 'none';
+                btnLogout.style.display = 'inline-flex';
+                const esAdmin = currentUser.rol === 'ADMINISTRADOR';
+                userBadge.innerHTML = `
+                    <span class="badge-role ${esAdmin ? 'role-admin' : 'role-cliente'}">
+                        👤 ${currentUser.username} [${currentUser.rol}]
+                    </span>
+                `;
+
+                if (esAdmin) {
+                    navDash.style.display = 'inline-flex';
+                    navAdm.style.display = 'inline-flex';
+                    navSwagger.style.display = 'inline-flex'; // Solo el admin ve Swagger
+                } else {
+                    navDash.style.display = 'none';
+                    navAdm.style.display = 'none';
+                    navSwagger.style.display = 'none'; // El cliente nunca ve Swagger
+                }
+            } else {
+                btnLogin.style.display = 'inline-flex';
+                btnLogout.style.display = 'none';
+                navDash.style.display = 'none';
+                navAdm.style.display = 'none';
+                navSwagger.style.display = 'none'; // No autenticados tampoco lo ven en el menú
+                userBadge.innerHTML = '';
+            }
+        }
+
+        function cerrarSesion() {
+            localStorage.clear();
+            window.location.href = '/login/';
+        }
+
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                return JSON.parse(decodeURIComponent(escape(window.atob(base64))));
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function notify(msg, type = "success") {
+            const n = document.getElementById('system-notification');
+            n.className = type === "success" ? "notify-success" : "notify-error";
+            n.innerText = msg;
+            n.style.display = 'block';
+            setTimeout(() => { n.style.display = 'none'; }, 3500);
+        }
+
+        document.addEventListener('DOMContentLoaded', actualizarBarraNavegacion);
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

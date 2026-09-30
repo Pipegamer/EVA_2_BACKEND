@@ -1,0 +1,251 @@
+{% extends 'base.html' %}
+
+{% block title %}Acceso al Sistema - Renting Industrial{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: calc(80vh - 120px);
+        padding: 1.5rem 1rem;
+    }
+
+    .auth-wrapper {
+        background-color: var(--bg-card);
+        border: 1px solid var(--border-ui);
+        border-radius: 12px;
+        padding: 2.2rem;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: var(--shadow-card);
+    }
+
+    .auth-tabs {
+        display: flex;
+        border-bottom: 2px solid var(--border-ui);
+        margin-bottom: 1.8rem;
+        gap: 8px;
+    }
+
+    .auth-tab-btn {
+        flex: 1;
+        background: none;
+        border: none;
+        padding: 10px;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--steel-gray);
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.2s ease;
+        text-align: center;
+    }
+
+    .auth-tab-btn.active {
+        color: var(--cat-yellow);
+        border-bottom-color: var(--cat-yellow);
+    }
+
+    .form-group {
+        margin-bottom: 1.25rem;
+    }
+
+    .form-group label {
+        display: block;
+        font-size: 0.82rem;
+        font-weight: 700;
+        color: var(--text-light);
+        margin-bottom: 6px;
+    }
+
+    .form-group input, 
+    .form-group select {
+        width: 100%;
+        padding: 11px 13px !important;
+        border-radius: 6px !important;
+        font-size: 0.9rem;
+        box-sizing: border-box;
+    }
+
+    .form-group input:focus, 
+    .form-group select:focus {
+        outline: none;
+        border-color: var(--cat-yellow) !important;
+    }
+
+    .btn-submit-auth {
+        width: 100%;
+        padding: 12px;
+        background-color: var(--cat-yellow);
+        color: #000;
+        font-weight: 800;
+        font-size: 0.95rem;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        margin-top: 0.6rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .btn-submit-auth:hover {
+        background-color: var(--cat-yellow-hover);
+    }
+
+    .hidden-panel {
+        display: none !important;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-wrapper">
+        <!-- Pestañas de Navegación -->
+        <div class="auth-tabs">
+            <button class="auth-tab-btn active" id="tab-login" onclick="cambiarModo('login')">Ingreso Seguro</button>
+            <button class="auth-tab-btn" id="tab-registro" onclick="cambiarModo('registro')">Registrar Empresa</button>
+        </div>
+
+        <!-- 1. Formulario de Inicio de Sesión -->
+        <form id="form-auth-login" onsubmit="ejecutarLogin(event)">
+            <div class="form-group">
+                <label>Nombre de Usuario</label>
+                <input type="text" id="login-username" placeholder="ejecutivo_demo / empresa_demo" required>
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="login-password" placeholder="••••••••" required>
+            </div>
+
+            <button type="submit" class="btn-submit-auth" id="btn-login-action">Ingresar al Sistema</button>
+        </form>
+
+        <!-- 2. Formulario de Registro con Selector de Rol -->
+        <form id="form-auth-registro" class="hidden-panel" onsubmit="ejecutarRegistro(event)">
+            <div class="form-group">
+                <label>Nombre de Usuario</label>
+                <input type="text" id="reg-username" placeholder="ej: constructora_norte" required>
+            </div>
+
+            <div class="form-group">
+                <label>Correo Electrónico (opcional)</label>
+                <input type="email" id="reg-email" placeholder="contacto@constructora.cl">
+            </div>
+
+            <div class="form-group">
+                <label>Tipo de Cuenta / Rol de Negocio</label>
+                <select id="reg-rol" required>
+                    <option value="CLIENTE">Empresa Constructora (Cliente)</option>
+                    <option value="ADMINISTRADOR">Ejecutivo de Arriendos (Administrador)</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="reg-password" placeholder="Crea una contraseña segura" required>
+            </div>
+
+            <button type="submit" class="btn-submit-auth" style="background-color: var(--cat-yellow);">Crear Cuenta de Acceso</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function cambiarModo(modo) {
+        const formLogin = document.getElementById('form-auth-login');
+        const formReg = document.getElementById('form-auth-registro');
+        const tabLogin = document.getElementById('tab-login');
+        const tabReg = document.getElementById('tab-registro');
+
+        if (modo === 'login') {
+            formLogin.classList.remove('hidden-panel');
+            formReg.classList.add('hidden-panel');
+            tabLogin.classList.add('active');
+            tabReg.classList.remove('active');
+        } else {
+            formLogin.classList.add('hidden-panel');
+            formReg.classList.remove('hidden-panel');
+            tabLogin.classList.remove('active');
+            tabReg.classList.add('active');
+        }
+    }
+
+    async function ejecutarLogin(e) {
+        e.preventDefault();
+        const u = document.getElementById('login-username').value.trim();
+        const p = document.getElementById('login-password').value;
+
+        try {
+            const res = await fetch(`${API_URL}/token/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: u, password: p })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('access_token', data.access);
+                localStorage.setItem('refresh_token', data.refresh);
+
+                const payload = parseJwt(data.access);
+                const usuarioData = {
+                    username: payload.username || u,
+                    rol: payload.rol || data.rol || 'CLIENTE'
+                };
+                localStorage.setItem('user_info', JSON.stringify(usuarioData));
+
+                notify("Sesión iniciada con éxito.", "success");
+
+                // Redirección inmediata según privilegios
+                setTimeout(() => {
+                    if (usuarioData.rol === 'ADMINISTRADOR') {
+                        window.location.href = '/dashboard/';
+                    } else {
+                        window.location.href = '/';
+                    }
+                }, 800);
+            } else {
+                notify("No active account found with the given credentials", "error");
+            }
+        } catch (err) {
+            console.error("Error en login:", err);
+            notify("Error de conexión con el servidor.", "error");
+        }
+    }
+
+    async function ejecutarRegistro(e) {
+        e.preventDefault();
+        const username = document.getElementById('reg-username').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+        const password = document.getElementById('reg-password').value;
+        const rol = document.getElementById('reg-rol').value;
+
+        try {
+            const res = await fetch(`${API_URL}/registro/`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, email, password, rol })
+            });
+
+            const data = await res.json();
+
+            if (res.ok) {
+                notify(data.mensaje || "Cuenta creada con éxito.", "success");
+                document.getElementById('form-auth-registro').reset();
+                document.getElementById('login-username').value = username;
+                cambiarModo('login');
+            } else {
+                notify(data.error || "No se pudo registrar la cuenta.", "error");
+            }
+        } catch (err) {
+            console.error("Error en registro:", err);
+            notify("Error de comunicación con la API.", "error");
+        }
+    }
+</script>
+{% endblock %}
