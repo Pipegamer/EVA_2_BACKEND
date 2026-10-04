@@ -23,6 +23,7 @@
             --hazard-red: #dc2626;
             --shadow-card: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.04);
             --header-bg: #ffffff;
+            --footer-bg: #ffffff;
         }
 
         /* ================= TEMA SECUNDARIO: MODO OSCURO ================= */
@@ -41,6 +42,7 @@
             --hazard-red: #ef4444;
             --shadow-card: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
             --header-bg: #111827;
+            --footer-bg: #111827;
         }
 
         * {
@@ -204,16 +206,84 @@
             width: 100%;
         }
 
+        /* ================= FOOTER EXIGIDO POR LA PAUTA EVA-2 ================= */
         footer {
-            background-color: var(--bg-card);
-            border-top: 1px solid var(--border-ui);
-            padding: 1.2rem;
-            text-align: center;
-            font-size: 0.8rem;
-            color: var(--steel-gray);
+            background-color: var(--footer-bg);
+            border-top: 2px solid var(--border-ui);
+            padding: 1.5rem 2rem;
             margin-top: auto;
+            box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.03);
         }
 
+        .footer-content {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .footer-left {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .footer-title {
+            font-weight: 800;
+            color: var(--text-heading);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .footer-subtitle {
+            color: var(--steel-gray);
+            font-size: 0.8rem;
+        }
+
+        .footer-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .student-pill {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-ui);
+            padding: 6px 14px;
+            border-radius: 8px;
+            color: var(--text-heading);
+            font-weight: 700;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .student-pill b {
+            color: var(--cat-yellow);
+        }
+
+        @media (max-width: 768px) {
+            .footer-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .footer-right {
+                width: 100%;
+            }
+            .student-pill {
+                width: 100%;
+            }
+        }
+
+        /* Notificación flotante */
         #system-notification {
             position: fixed;
             bottom: 24px;
@@ -241,7 +311,7 @@
 
         <div class="nav-actions">
             <!-- Palanca Tema -->
-            <div class="theme-switch-wrap" title="Cambiar a Modo Oscuro">
+            <div class="theme-switch-wrap" title="Cambiar Tema">
                 <span style="font-size: 0.8rem;">☀️</span>
                 <label class="theme-switch">
                     <input type="checkbox" id="theme-toggle" onchange="alternarTema(this.checked)">
@@ -254,7 +324,7 @@
             <a href="/" class="btn-ui">Catálogo Flota</a>
             <a href="/dashboard/" id="nav-dashboard" class="btn-ui" style="display: none;">Panel Ejecutivo</a>
             
-            <!-- SWAGGER Y ADMIN: VISIBLES EXCLUSIVAMENTE PARA EL ADMINISTRADOR -->
+            <!-- SWAGGER Y DJANGO ADMIN: EXCLUSIVOS PARA EL ADMINISTRADOR -->
             <a href="/api/docs/" target="_blank" class="btn-ui" id="nav-swagger" style="display: none;">Swagger API</a>
             <a href="/admin/" target="_blank" class="btn-ui" id="nav-admin" style="display: none;">Django Admin</a>
 
@@ -269,8 +339,31 @@
         {% block content %}{% endblock %}
     </main>
 
+    <!-- FOOTER INSTITUCIONAL EVA-2 -->
     <footer>
-        Sistema de Gestión y Arriendo de Maquinaria Pesada | Arquitectura Transaccional ACID PostgreSQL 2026
+        <div class="footer-content">
+            <div class="footer-left">
+                <div class="footer-title">
+                    <span>🚜 Plataforma de Arriendo de Maquinaria Pesada</span>
+                    <span style="font-size: 0.72rem; background: var(--cat-amber-dim); color: var(--cat-yellow); padding: 2px 6px; border-radius: 4px; font-weight: 800;">Caso 6</span>
+                </div>
+                <div class="footer-subtitle">
+                    Arquitectura Transaccional ACID PostgreSQL | Django REST Framework
+                </div>
+            </div>
+            
+            <div class="footer-right">
+                <div class="student-pill">
+                    <span>👤 Desarrollador: <b>Felipe Eduardo Rivas Garrido</b></span>
+                </div>
+                <div class="student-pill">
+                    <span>📚 Sección: <b>AP-N4-C2</b></span>
+                </div>
+                <div class="student-pill">
+                    <span>📅 Año: <b>2026</b></span>
+                </div>
+            </div>
+        </div>
     </footer>
 
     <div id="system-notification"></div>
@@ -331,18 +424,18 @@
                 if (esAdmin) {
                     navDash.style.display = 'inline-flex';
                     navAdm.style.display = 'inline-flex';
-                    navSwagger.style.display = 'inline-flex'; // Solo el admin ve Swagger
+                    navSwagger.style.display = 'inline-flex';
                 } else {
                     navDash.style.display = 'none';
                     navAdm.style.display = 'none';
-                    navSwagger.style.display = 'none'; // El cliente nunca ve Swagger
+                    navSwagger.style.display = 'none';
                 }
             } else {
                 btnLogin.style.display = 'inline-flex';
                 btnLogout.style.display = 'none';
                 navDash.style.display = 'none';
                 navAdm.style.display = 'none';
-                navSwagger.style.display = 'none'; // No autenticados tampoco lo ven en el menú
+                navSwagger.style.display = 'none';
                 userBadge.innerHTML = '';
             }
         }
